@@ -1,0 +1,55 @@
+name: CI
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CGO_ENABLED: 0
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.15.7'
+      - name: Install dependencies
+        run: make install
+      - name: Run lint check
+        run: make lint
+      - name: Run build
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o build/resource-checker-linux-amd64 checker.go
+          GOOS=linux GOARCH=arm64 go build -o build/resource-checker-linux-arm64 checker.go
+          GOOS=windows go build -o build/resource-checker-windows-amd64.exe checker.go
+          GOOS=darwin go build -o build/resource-checker-darwin-amd64 checker.go
+      - name: Create artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: resource-checker-binaries
+          path: build/
+
+  release:
+    if: startsWith(github.ref, 'refs/tags')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Download binaries artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: resource-checker-binaries
+          path: build/
+      - name: Uploaded binaries as release assets
+        run: |
+          set -x
+          tag_name="${GITHUB_REF##*/}"
+          assets=()
+          for binary in ./build/*; do
+            assets+=("-a" "${binary}")
+          done
+          hub release edit "${assets[@]}" -m "$tag_name" "$tag_name"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
