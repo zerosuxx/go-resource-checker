@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	const VERSION = "0.0.3"
+	const VERSION = "0.1.0"
 	log.Println("Res0urce Checker " + VERSION)
 
 	serverCommand := flag.NewFlagSet("server", flag.ContinueOnError)
@@ -46,33 +46,36 @@ func main() {
 				serverCommand.Usage()
 				os.Exit(1)
 			}
-			handleServerCommand(address)
+			handleServerCommand(address, timeout)
 		}
 	}
 }
 
-type SuccessResponse struct {
-	Success bool `json:"success"`
-}
-
-func handleServerCommand(address string) {
+func handleServerCommand(address string, timeout int) {
 	var resourceUrls []string
 	_ = json.Unmarshal([]byte(os.Getenv("RESOURCE_URLS")), &resourceUrls)
-	resourceChecker := checker.ResourceChecker{}
+	resourceChecker := checker.ResourceChecker{CheckSuccessOnHealthCheck: true}
+
+	log.Println(resourceUrls)
 
 	http.HandleFunc("/healthcheck", func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(200)
 
-		response := SuccessResponse{}
+		response := checker.SuccessResponse{}
 		success := true
 		for _, resourceUrl := range resourceUrls {
 			u, _ := url.Parse(resourceUrl)
-			connectionError := resourceChecker.Check(u, 30)
+
+			log.Println("Checking: "+resourceUrl+" (timeout:", strconv.Itoa(timeout)+")")
+
+			connectionError := resourceChecker.Check(u, timeout)
 
 			if connectionError != nil {
 				success = false
-				log.Println(connectionError)
+				log.Println("Error: " + connectionError.Error())
+			} else {
+				log.Println("Ok: " + resourceUrl)
 			}
 		}
 
