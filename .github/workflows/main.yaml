@@ -22,6 +22,7 @@ jobs:
         run: |
           GOOS=linux GOARCH=amd64 go build -o build/resource-checker-linux-amd64 checker.go
           GOOS=linux GOARCH=arm64 go build -o build/resource-checker-linux-arm64 checker.go
+          GOOS=linux GOARCH=arm go build -o build/resource-checker-linux-arm checker.go
           GOOS=windows go build -o build/resource-checker-windows-amd64.exe checker.go
           GOOS=darwin go build -o build/resource-checker-darwin-amd64 checker.go
       - name: Create artifacts
