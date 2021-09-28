@@ -2,6 +2,9 @@ name: CI
 
 on: push
 
+env:
+  BINARY_NAME: resource-checker
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,15 +23,16 @@ jobs:
         run: make lint
       - name: Run build
         run: |
-          GOOS=linux GOARCH=amd64 go build -o build/resource-checker-linux-amd64 checker.go
-          GOOS=linux GOARCH=arm64 go build -o build/resource-checker-linux-arm64 checker.go
-          GOOS=linux GOARCH=arm go build -o build/resource-checker-linux-arm checker.go
-          GOOS=windows go build -o build/resource-checker-windows-amd64.exe checker.go
-          GOOS=darwin go build -o build/resource-checker-darwin-amd64 checker.go
+          GOOS=linux GOARCH=amd64 go build -o build/${BINARY_NAME}-linux-x86_64 checker.go
+          GOOS=linux GOARCH=arm64 go build -o build/${BINARY_NAME}-linux-aarch64 checker.go
+          GOOS=linux GOARCH=arm go build -o build/${BINARY_NAME}-linux-armv7l checker.go
+          GOOS=darwin GOARCH=amd64 go build -o build/${BINARY_NAME}-darwin-x86_64 checker.go
+          GOOS=darwin GOARCH=arm64 go build -o build/${BINARY_NAME}-darwin-aarch64 checker.go
+          GOOS=windows GOARCH=amd64 go build -o build/${BINARY_NAME}-windows-x86_64.exe checker.go
       - name: Create artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: resource-checker-binaries
+          name: ${{ env.BINARY_NAME }}-binaries
           path: build/
 
   release:
@@ -41,7 +45,7 @@ jobs:
       - name: Download binaries artifact
         uses: actions/download-artifact@v2
         with:
-          name: resource-checker-binaries
+          name: ${{ env.BINARY_NAME }}-binaries
           path: build/
       - name: Uploaded binaries as release assets
         run: |
