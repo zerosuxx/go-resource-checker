@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	const VERSION = "0.1.1"
+	const VERSION = "0.1.2"
 	log.Println("Res0urce Checker " + VERSION)
 
 	serverCommand := flag.NewFlagSet("server", flag.ContinueOnError)
