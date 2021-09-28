@@ -11,9 +11,10 @@ import (
 	"strconv"
 )
 
+var Version = "development"
+
 func main() {
-	const VERSION = "0.1.2"
-	log.Println("Res0urce Checker " + VERSION)
+	log.Println("Res0urce Checker " + Version)
 
 	serverCommand := flag.NewFlagSet("server", flag.ContinueOnError)
 	var address string
