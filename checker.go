@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"github.com/zerosuxx/go-resource-checker/pkg/checker"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -55,6 +57,8 @@ func main() {
 func handleServerCommand(address string, timeout int) {
 	var resourceUrls []string
 	_ = json.Unmarshal([]byte(os.Getenv("RESOURCE_URLS")), &resourceUrls)
+	slackNotificationUrl := os.Getenv("SLACK_WEBHOOK_URL")
+	successValue := os.Getenv("FORCE_SUCCESS_RESPONSE") == "1"
 	resourceChecker := checker.ResourceChecker{CheckSuccessOnHealthCheck: true}
 
 	log.Println(resourceUrls)
@@ -68,12 +72,16 @@ func handleServerCommand(address string, timeout int) {
 		for _, resourceUrl := range resourceUrls {
 			u, _ := url.Parse(resourceUrl)
 
-			log.Println("Checking: "+resourceUrl+" (timeout:", strconv.Itoa(timeout)+")")
+			log.Println("Checking: "+resourceUrl+" (max timeout:", strconv.Itoa(timeout)+")")
 
 			connectionError := resourceChecker.Check(u, timeout)
 
 			if connectionError != nil {
-				success = false
+				success = successValue
+				if slackNotificationUrl != "" {
+					slackResponse := sendSlackNotification(slackNotificationUrl, "*"+resourceUrl+" is not healthy!*")
+					log.Println("Slack response: " + slackResponse)
+				}
 				log.Println("Error: " + connectionError.Error())
 			} else {
 				log.Println("Ok: " + resourceUrl)
@@ -85,7 +93,7 @@ func handleServerCommand(address string, timeout int) {
 		_, _ = writer.Write(responseByte)
 	})
 
-	log.Println("Server listening on: " + address)
+	log.Println("Server listening on: http://" + address)
 	log.Fatal(http.ListenAndServe(address, nil))
 }
 
@@ -106,4 +114,15 @@ func handleCheckCommand(resourceUrl string, timeout int) {
 	}
 
 	log.Println("Connection successfully")
+}
+
+func sendSlackNotification(url string, message string) string {
+	client := http.Client{}
+	values := map[string]string{"text": message}
+	jsonValue, _ := json.Marshal(values)
+
+	response, _ := client.Post(url, "Content-type: application/json", bytes.NewBuffer(jsonValue))
+	body, _ := io.ReadAll(response.Body)
+
+	return string(body)
 }
