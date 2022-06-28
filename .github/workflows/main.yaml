@@ -21,8 +21,8 @@ jobs:
         run: make install
       - name: Run lint check
         run: |
-          ls -al $GOPATH/bin
-          export PATH=$PATH:$GOPATH/bin
+          ls -al $(go env GOPATH)/bin
+          export PATH=$PATH:$(go env GOPATH)/bin
           make lint
       - name: Run build
         run: make build-all
