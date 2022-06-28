@@ -1,6 +1,6 @@
 module github.com/zerosuxx/go-resource-checker
 
-go 1.16
+go 1.18
 
 require (
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
