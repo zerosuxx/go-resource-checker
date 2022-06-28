@@ -95,6 +95,12 @@ func handleServerCommand(address string, timeout int) {
 	})
 
 	http.HandleFunc("/healthcheck", func(writer http.ResponseWriter, request *http.Request) {
+		if request.Header.Get("X-Auth-Token") != os.Getenv("AUTH_TOKEN") {
+			writer.WriteHeader(http.StatusUnauthorized)
+
+			return
+		}
+
 		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(200)
 
