@@ -9,7 +9,7 @@ help: ## Show this help
 
 install: ## Install the binary
 	go install
-	go get golang.org/x/lint/golint
+	go get -u golang.org/x/lint/golint
 
 build: ## Build the application
 	CGO_ENABLED=0 go build -ldflags="-X 'main.Version=${version}'" -o build/resource-checker checker.go
