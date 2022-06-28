@@ -20,7 +20,9 @@ jobs:
       - name: Install dependencies
         run: make install
       - name: Run lint check
-        run: make lint
+        run: |
+          export PATH=$PATH:$GOPATH/bin
+          make lint
       - name: Run build
         run: make build-all
       - name: Create artifacts
