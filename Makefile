@@ -9,7 +9,7 @@ help: ## Show this help
 
 install: ## Install the binary
 	go install
-	go get -u golang.org/x/lint/golint
+	go install honnef.co/go/tools/cmd/staticcheck@latest
 
 build: ## Build the application
 	CGO_ENABLED=0 go build -ldflags="-X 'main.Version=${version}'" -o build/resource-checker checker.go
@@ -27,4 +27,4 @@ run: ## Run the application
 	go run checker.go server
 
 lint: ## Check lint errors
-	golint -set_exit_status=1 -min_confidence=1.1 ./...
+	staticcheck ./...

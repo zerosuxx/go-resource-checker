@@ -20,10 +20,7 @@ jobs:
       - name: Install dependencies
         run: make install
       - name: Run lint check
-        run: |
-          ls -al $(go env GOPATH)/bin
-          export PATH=$PATH:$(go env GOPATH)/bin
-          make lint
+        run: make lint
       - name: Run build
         run: make build-all
       - name: Create artifacts
