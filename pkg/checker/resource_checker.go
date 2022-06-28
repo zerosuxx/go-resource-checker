@@ -59,7 +59,7 @@ func (c ResourceChecker) checkHTTP(u *url.URL, timeout time.Duration) error {
 		body := getBytesFromBody(response.Body)
 		response.Body = getBodyFromBytes(body)
 
-		successResponse := SuccessResponse{}
+		successResponse := JsonResponse{}
 		_ = json.Unmarshal(body, &successResponse)
 
 		if successResponse.Success == false {

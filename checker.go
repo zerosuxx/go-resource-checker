@@ -63,11 +63,42 @@ func handleServerCommand(address string, timeout int) {
 
 	log.Println(resourceUrls)
 
+	http.HandleFunc("/check", func(writer http.ResponseWriter, request *http.Request) {
+		if request.Header.Get("X-Auth-Token") != os.Getenv("AUTH_TOKEN") {
+			writer.WriteHeader(http.StatusUnauthorized)
+
+			return
+		}
+
+		checkUrl := request.URL.Query().Get("url")
+		u, err := url.Parse(checkUrl)
+		if checkUrl == "" || err != nil {
+			writer.WriteHeader(http.StatusBadRequest)
+
+			return
+		}
+
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(200)
+
+		connectionError := resourceChecker.Check(u, timeout)
+		response := checker.JsonResponse{}
+		if connectionError != nil {
+			response.Success = false
+			response.Message = connectionError.Error()
+		} else {
+			response.Success = true
+		}
+
+		responseByte, _ := json.Marshal(response)
+		_, _ = writer.Write(responseByte)
+	})
+
 	http.HandleFunc("/healthcheck", func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(200)
 
-		response := checker.SuccessResponse{}
+		response := checker.JsonResponse{}
 		success := true
 		for _, resourceUrl := range resourceUrls {
 			u, _ := url.Parse(resourceUrl)
