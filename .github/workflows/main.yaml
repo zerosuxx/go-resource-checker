@@ -17,6 +17,8 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: '1.18.3'
+      - name: Install arm64 gcc compiler
+        run: sudo apt-get install -y aarch64-linux-gnu-gcc
       - name: Install dependencies
         run: make install
       - name: Run lint check
