@@ -17,7 +17,6 @@ build: ## Build the application
 build-all: ## Build application for supported architectures
 	@echo "version: ${version}"
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-X 'main.Version=${version}'" -o build/${BINARY_NAME}-linux-x86_64 checker.go
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 GODEBUG=netdns=cgo go build -ldflags="-X 'main.Version=${version}'" -o build/${BINARY_NAME}-linux-cgo-x86_64 checker.go
 	GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-X 'main.Version=${version}'" -o build/${BINARY_NAME}-linux-aarch64 checker.go
 	GOOS=linux GOARCH=arm CGO_ENABLED=0 go build -ldflags="-X 'main.Version=${version}'" -o build/${BINARY_NAME}-linux-armv7l checker.go
 	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-X 'main.Version=${version}'" -o build/${BINARY_NAME}-darwin-x86_64 checker.go
