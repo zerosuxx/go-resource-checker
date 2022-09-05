@@ -23,13 +23,13 @@ func (c ResourceChecker) Check(u *url.URL, timeout int) error {
 	timeoutDuration := time.Second * time.Duration(timeout)
 
 	if u.Scheme == "tcp" || u.Scheme == "udp" {
-		return c.checkTCP(u, timeoutDuration)
+		return c.checkNetwork(u, timeoutDuration)
 	} else {
 		return c.checkHTTP(u, timeoutDuration)
 	}
 }
 
-func (c ResourceChecker) checkTCP(u *url.URL, timeout time.Duration) error {
+func (c ResourceChecker) checkNetwork(u *url.URL, timeout time.Duration) error {
 	dialer := net.Dialer{
 		Timeout: timeout,
 		Resolver: &net.Resolver{
