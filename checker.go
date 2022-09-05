@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"time"
 )
 
 var Version = "development"
@@ -81,7 +82,14 @@ func handleServerCommand(address string, timeout int) {
 		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(200)
 
+		log.Println("Checking: " + u.String() + " (max timeout: " + strconv.Itoa(timeout) + ")")
+
+		startTime := time.Now()
 		connectionError := resourceChecker.Check(u, timeout)
+		checkDuration := time.Now().Sub(startTime)
+
+		log.Println("Checked: " + u.String() + " (duration: " + checkDuration.String() + ")")
+
 		response := checker.JsonResponse{}
 		if connectionError != nil {
 			response.Success = false
