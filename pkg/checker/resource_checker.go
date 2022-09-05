@@ -29,7 +29,18 @@ func (c ResourceChecker) Check(u *url.URL, timeout int) error {
 }
 
 func (c ResourceChecker) checkTCP(u *url.URL, timeout time.Duration) error {
-	dialer := net.Dialer{Timeout: timeout}
+	dialer := net.Dialer{
+		Timeout: timeout,
+		Resolver: &net.Resolver{
+			PreferGo: true,
+			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+				d := net.Dialer{
+					Timeout: time.Millisecond * time.Duration(10000),
+				}
+				return d.DialContext(ctx, network, "8.8.8.8:53")
+			},
+		},
+	}
 	connection, err := dialer.Dial(u.Scheme, u.Host)
 
 	if err != nil {
