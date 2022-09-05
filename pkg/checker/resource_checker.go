@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -30,17 +31,17 @@ func (c ResourceChecker) Check(u *url.URL, timeout int) error {
 }
 
 func (c ResourceChecker) checkNetwork(u *url.URL, timeout time.Duration) error {
+	ip, err := lookupIPv4WithRetry(u.Hostname(), 5, 3)
+
+	if err != nil {
+		return err
+	}
+
+	u.Host = ip.String() + ":" + u.Port()
+	log.Println("Resolved IP address: " + u.Hostname())
+
 	dialer := net.Dialer{
 		Timeout: timeout,
-		Resolver: &net.Resolver{
-			PreferGo: true,
-			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
-				d := net.Dialer{
-					Timeout: timeout,
-				}
-				return d.DialContext(ctx, network, "127.0.0.11:53")
-			},
-		},
 	}
 	connection, err := dialer.Dial(u.Scheme, u.Host)
 
@@ -93,4 +94,21 @@ func getBytesFromBody(body io.ReadCloser) []byte {
 
 func getBodyFromBytes(data []byte) io.ReadCloser {
 	return ioutil.NopCloser(bytes.NewBuffer(data))
+}
+
+func lookupIPv4WithRetry(hostName string, tryCount int, waitTimeInSeconds int) (net.IP, error) {
+	var ip net.IP
+	var err error
+	for i := 1; i <= tryCount; i++ {
+		var ips, err = net.DefaultResolver.LookupIP(context.Background(), "ip4", hostName)
+
+		if err != nil {
+			time.Sleep(time.Duration(waitTimeInSeconds) * time.Second)
+			continue
+		}
+
+		ip = ips[0]
+	}
+
+	return ip, err
 }
