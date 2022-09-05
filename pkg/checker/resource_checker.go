@@ -2,6 +2,7 @@ package checker
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
