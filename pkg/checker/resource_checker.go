@@ -37,11 +37,12 @@ func (c ResourceChecker) checkNetwork(u *url.URL, timeout time.Duration) error {
 		return err
 	}
 
-	u.Host = ip.String() + ":" + u.Port()
-	log.Println("Resolved IP address: " + u.Hostname())
+	urlWithIP, _ := url.Parse(u.String())
+	urlWithIP.Host = ip.String() + ":" + u.Port()
+	log.Println("Resolved IP address: " + urlWithIP.Hostname())
 
 	dialer := net.Dialer{Timeout: timeout}
-	connection, err := dialer.Dial(u.Scheme, u.Host)
+	connection, err := dialer.Dial(urlWithIP.Scheme, urlWithIP.Host)
 
 	if err != nil {
 		return err
