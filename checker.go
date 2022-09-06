@@ -82,20 +82,20 @@ func handleServerCommand(address string, timeout int) {
 		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(200)
 
-		log.Println("Checking: " + u.String() + " (max timeout: " + strconv.Itoa(timeout) + ")")
+		log.Println("Checking: " + u.String() + " (max timeout: " + strconv.Itoa(timeout) + "s)")
 
 		startTime := time.Now()
 		connectionError := resourceChecker.Check(u, timeout)
-		checkDuration := time.Now().Sub(startTime)
+		checkDuration := time.Since(startTime)
 
 		log.Println("Checked: " + u.String() + " (duration: " + checkDuration.String() + ")")
 
 		response := checker.JsonResponse{}
-		if connectionError != nil {
+		if connectionError == nil {
+			response.Success = true
+		} else {
 			response.Success = false
 			response.Message = connectionError.Error()
-		} else {
-			response.Success = true
 		}
 
 		responseByte, _ := json.Marshal(response)
