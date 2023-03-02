@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -85,14 +84,14 @@ func (c ResourceChecker) checkHTTP(u *url.URL, timeout time.Duration) error {
 func getBytesFromBody(body io.ReadCloser) []byte {
 	var bodyBytes []byte
 	if body != nil {
-		bodyBytes, _ = ioutil.ReadAll(body)
+		bodyBytes, _ = io.ReadAll(body)
 	}
 
 	return bodyBytes
 }
 
 func getBodyFromBytes(data []byte) io.ReadCloser {
-	return ioutil.NopCloser(bytes.NewBuffer(data))
+	return io.NopCloser(bytes.NewBuffer(data))
 }
 
 func lookupIPv4WithRetry(hostName string, tryCount int, waitTimeInSeconds int) (net.IP, error) {
